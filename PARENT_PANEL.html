@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Школа 215 · Родительский контроль</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0a2647 0%, #1e3a5f 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .logout-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        .child-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .child-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0ecf9;
+        }
+        .child-avatar {
+            width: 60px;
+            height: 60px;
+            background: #0a2647;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+        }
+        .grades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .grade-item {
+            background: #f5faff;
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .grade-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .grade-5 { color: #22c55e; }
+        .grade-4 { color: #f59e0b; }
+        .grade-3 { color: #f97316; }
+        .grade-2 { color: #dc2626; }
+        .announcement {
+            background: #fef2f2;
+            border-left: 5px solid #dc2626;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+        }
+        .homework-item {
+            background: #f5faff;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #5f7d9e;
+        }
+        h3 {
+            margin: 20px 0 10px 0;
+            color: #0a2647;
+        }
+        h3:first-of-type {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏫 Школа 215 · Родительский контроль</h1>
+            <button class="logout-btn" onclick="logout()">Выйти</button>
+        </div>
+        
+        <div id="children-container"></div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' });
+                if (!response.ok) { window.location.href = '/'; return null; }
+                const user = await response.json();
+                if (user.role !== 'parent') window.location.href = '/';
+                return user;
+            } catch (error) { 
+                window.location.href = '/'; 
+                return null; 
+            }
+        }
+        
+        async function logout() {
+            await fetch(`${API_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+            window.location.href = '/';
+        }
+        
+        async function loadChildData(childId, childName) {
+            try {
+                const [gradesRes, homeworkRes, scheduleRes, announcementsRes] = await Promise.all([
+                    fetch(`${API_URL}/api/grades?student_id=${childId}`, { credentials: 'include' }),
+                    fetch(`${API_URL}/api/homework`, { credentials: 'include' }),
+                    fetch(`${API_URL}/api/schedule/day?class=9А&day=${new Date().getDay() === 0 ? 6 : new Date().getDay() - 1}`, { credentials: 'include' }),
+                    fetch(`${API_URL}/api/announcements`, { credentials: 'include' })
+                ]);
+                
+                const grades = await gradesRes.json();
+                const homeworks = await homeworkRes.json();
+                const schedule = await scheduleRes.json();
+                const announcements = await announcementsRes.json();
+                
+                const avgGrade = grades.length ? (grades.reduce((s, g) => s + g.grade, 0) / grades.length).toFixed(1) : '—';
+                
+                return `
+                    <div class="child-card">
+                        <div class="child-header">
+                            <div class="child-avatar"><i class="fas fa-child"></i></div>
+                            <div>
+                                <h2>${childName}</h2>
+                                <p>Средний балл: <strong>${avgGrade}</strong></p>
+                            </div>
+                        </div>
+                        
+                        <h3><i class="fas fa-star"></i> Оценки</h3>
+                        <div class="grades-grid">
+                            ${grades.slice(0, 6).map(g => `
+                                <div class="grade-item">
+                                    <div class="grade-value grade-${g.grade}">${g.grade}</div>
+                                    <small>${g.subject}</small>
+                                </div>
+                            `).join('')}
+                            ${grades.length === 0 ? '<p>Нет оценок</p>' : ''}
+                        </div>
+                        
+                        <h3><i class="fas fa-home"></i> Домашние задания</h3>
+                        ${homeworks.map(h => `
+                            <div class="homework-item">
+                                <strong>${h.subject}</strong>
+                                <p>${h.task}</p>
+                                <small>Сдать до: ${h.deadline ? new Date(h.deadline).toLocaleDateString() : 'не указано'}</small>
+                            </div>
+                        `).join('')}
+                        ${homeworks.length === 0 ? '<p>Нет домашних заданий</p>' : ''}
+                        
+                        <h3><i class="fas fa-calendar"></i> Расписание на сегодня</h3>
+                        ${schedule.map(l => `
+                            <div class="homework-item">
+                                <strong>${l.time}</strong> - ${l.subject} (каб. ${l.room})
+                            </div>
+                        `).join('')}
+                        ${schedule.length === 0 ? '<p>Сегодня уроков нет</p>' : ''}
+                        
+                        <h3><i class="fas fa-bullhorn"></i> Важные объявления</h3>
+                        ${announcements.filter(a => a.announcement_type === 'urgent').slice(0, 3).map(a => `
+                            <div class="announcement">
+                                <strong>🚨 ${a.title}</strong>
+                                <p>${a.content}</p>
+                                <small>${new Date(a.created_at).toLocaleString()}</small>
+                            </div>
+                        `).join('')}
+                        ${announcements.filter(a => a.announcement_type === 'urgent').length === 0 ? '<p>Нет срочных объявлений</p>' : ''}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Load child error:', error);
+                return `<div class="child-card"><p>Ошибка загрузки данных</p></div>`;
+            }
+        }
+        
+        async function loadParentsData() {
+            const container = document.getElementById('children-container');
+            container.innerHTML = '<div class="loading">Загрузка...</div>';
+            
+            try {
+                const user = await checkAuth();
+                if (!user) return;
+                
+                const usersRes = await fetch(`${API_URL}/api/users`, { credentials: 'include' });
+                const users = await usersRes.json();
+                
+                const children = users.filter(u => u.role === 'student' && u.parent_id === user.id);
+                
+                if (children.length === 0) {
+                    container.innerHTML = '<div class="child-card"><p>Нет привязанных детей. Обратитесь к администратору.</p></div>';
+                    return;
+                }
+                
+                let html = '';
+                for (const child of children) {
+                    html += await loadChildData(child.id, child.fullName || child.full_name);
+                }
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Load parents error:', error);
+                container.innerHTML = '<div class="child-card"><p>Ошибка загрузки</p></div>';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadParentsData);
+    </script>
+</body>
+</html>

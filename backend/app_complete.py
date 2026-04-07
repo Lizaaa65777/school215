@@ -6,7 +6,7 @@ import hashlib
 import secrets
 import os
 
-app = Flask(__name__, static_folder='../frontend', static_url_path='')
+app = Flask(__name__, static_folder='../', static_url_path='')
 app.config['SECRET_KEY'] = 'school215-secret-key-2024'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -201,25 +201,25 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    return send_from_directory('../frontend', 'login.html')
+    return send_from_directory('../', 'login.html')
 
 @app.route('/admin')
 def admin_page():
-    return send_from_directory('../frontend', 'ADMIN_PANEL.html')
+    return send_from_directory('../', 'ADMIN_PANEL.html')
 
 @app.route('/parent')
 def parent_page():
-    return send_from_directory('../frontend', 'PARENT_PANEL.html')
+    return send_from_directory('../', 'PARENT_PANEL.html')
 
 @app.route('/tv')
 def tv_panel_page():
     """Страница ТВ-панели"""
-    return send_from_directory('../frontend', 'tv.html')
+    return send_from_directory('../', 'tv.html')
 
 @app.route('/tv-login')
 def tv_login_page():
     """Страница входа для ТВ-панели"""
-    return send_from_directory('../frontend', 'tv-login.html')
+    return send_from_directory('../', 'tv-login.html')
 
 # ==================== АУТЕНТИФИКАЦИЯ ====================
 

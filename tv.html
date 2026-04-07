@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Школа 215 - TV Панель</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Tahoma', Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .tv-screen {
+            width: 100vw;
+            height: 100vh;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Нормальный режим */
+        .mode-normal {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+        }
+        
+        /* ЧС режим */
+        .mode-emergency {
+            background: repeating-linear-gradient(45deg, #8b0000 0px, #8b0000 40px, #cc0000 40px, #cc0000 80px);
+            animation: emergencyFlash 0.5s infinite;
+        }
+        
+        @keyframes emergencyFlash {
+            0% { opacity: 1; }
+            50% { opacity: 0.95; }
+            100% { opacity: 1; }
+        }
+        
+        /* Ночной режим */
+        .mode-night {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #ffaa00;
+        }
+        
+        .mode-night .card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #ffaa00;
+        }
+        
+        /* Шапка */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .school-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            color: #ffaa00;
+            text-transform: uppercase;
+        }
+        
+        .school-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+        
+        /* Сетка объявлений - 2 колонки */
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 10px;
+        }
+        
+        /* Карточка объявления */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ffaa00;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .card-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .card-content p {
+            margin-bottom: 8px;
+        }
+        
+        .card-footer {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Срочное объявление - красная карточка */
+        .card-emergency {
+            background: rgba(255, 0, 0, 0.2);
+            border-left: 3px solid #ff0000;
+        }
+        
+        .card-emergency .card-title {
+            color: #ff6666;
+        }
+        
+        /* Режим ЧС - полноэкранное сообщение */
+        .emergency-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ff0000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        .emergency-fullscreen h1 {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            animation: pulse 1s infinite;
+        }
+        
+        .emergency-fullscreen p {
+            font-size: 2rem;
+            max-width: 80%;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Подвал */
+        .footer {
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px 20px;
+        }
+        
+        /* Кнопка выхода */
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.2s;
+            z-index: 100;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 0, 0, 0.6);
+        }
+        
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: #1a1f3a;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            border: 2px solid #ffaa00;
+        }
+        
+        .modal-content h3 {
+            color: #ffaa00;
+            margin-bottom: 20px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .confirm-yes {
+            background: #ff4444;
+            color: white;
+        }
+        
+        .confirm-no {
+            background: #666;
+            color: white;
+        }
+        
+        /* Скроллбар */
+        .main-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .main-grid::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .main-grid::-webkit-scrollbar-thumb {
+            background: #ffaa00;
+            border-radius: 3px;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .tv-screen {
+                padding: 15px;
+            }
+            .school-title {
+                font-size: 1.2rem;
+            }
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="tv-screen" id="tvScreen">
+    <div class="header">
+        <div class="school-title">ШКОЛА 215 "СОЗВЕЗДИЕ"</div>
+        <div class="school-subtitle" id="panelName">Цифровая интерактивная система</div>
+    </div>
+    
+    <div class="main-grid" id="announcementsGrid">
+        <!-- Динамические объявления -->
+    </div>
+    
+    <div class="footer">
+        <span id="systemTime">--:--:--</span>
+        <span id="systemStatus">Система загрузки...</span>
+        <span id="panelsStatus"></span>
+        <span>Обновление через: <span id="updateCountdown">00</span> сек</span>
+    </div>
+    
+    <button class="logout-btn" onclick="showLogoutModal()">🔓 Выход</button>
+</div>
+
+<!-- Модальное окно -->
+<div id="logoutModal" class="modal">
+    <div class="modal-content">
+        <h3>🔓 Выход из ТВ-панели</h3>
+        <p>Вы уверены, что хотите выйти?</p>
+        <div class="modal-buttons">
+            <button class="confirm-yes" onclick="logout()">Да, выйти</button>
+            <button class="confirm-no" onclick="hideLogoutModal()">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let tvToken = localStorage.getItem('tv_token');
+    let countdown = 0;
+    
+    function showLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'flex';
+    }
+    
+    function hideLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+    
+    async function logout() {
+        try {
+            if (tvToken) {
+                await fetch('/api/tv/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-TV-Token': tvToken
+                    }
+                });
+            }
+        } catch(e) {
+            console.error('Ошибка при выходе:', e);
+        }
+        
+        localStorage.removeItem('tv_token');
+        localStorage.removeItem('tv_panel_id');
+        window.location.href = '/tv-login';
+    }
+    
+    async function initTV() {
+        tvToken = localStorage.getItem('tv_token');
+        
+        if (!tvToken) {
+            window.location.href = '/tv-login';
+            return;
+        }
+        
+        startPolling();
+    }
+    
+    async function fetchTVData() {
+        try {
+            const resp = await fetch('/api/tv/data', {
+                headers: {'X-TV-Token': tvToken}
+            });
+            
+            if (resp.status === 401) {
+                localStorage.removeItem('tv_token');
+                window.location.href = '/tv-login';
+                return;
+            }
+            
+            const data = await resp.json();
+            
+            // Применяем режим
+            const screen = document.getElementById('tvScreen');
+            
+            if (data.mode === 'emergency') {
+                // Полноэкранный режим ЧС
+                document.body.innerHTML = `
+                    <div class="emergency-fullscreen">
+                        <h1>⚠️ ЧРЕЗВЫЧАЙНАЯ СИТУАЦИЯ ⚠️</h1>
+                        <p>${data.announcements[0]?.content || 'Следуйте указаниям персонала'}</p>
+                        <p style="font-size: 1rem; margin-top: 50px;">${data.current_time} | Следуйте указаниям учителей</p>
+                        <button class="logout-btn" style="position: fixed; bottom: 20px; right: 20px;" onclick="location.reload()">🔄 Выйти из ЧС</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            screen.className = `tv-screen mode-${data.mode}`;
+            
+            // Заполняем объявления
+            const grid = document.getElementById('announcementsGrid');
+            grid.innerHTML = '';
+            
+            // Определяем тип объявления и форматируем контент
+            data.announcements.forEach((ann) => {
+                const card = document.createElement('div');
+                let typeClass = '';
+                let titleText = '';
+                
+                if (ann.type === 'emergency') {
+                    typeClass = 'card-emergency';
+                    titleText = '🚨 СРОЧНО!';
+                } else if (ann.type === 'event') {
+                    titleText = '🎉 Мероприятие';
+                } else if (ann.type === 'schedule') {
+                    titleText = '📅 Расписание';
+                } else {
+                    titleText = '📢 Объявление';
+                }
+                
+                card.className = `card ${typeClass}`;
+                
+                // Форматируем контент - разбиваем на строки
+                let contentHtml = `<p>${ann.content || ''}</p>`;
+                
+                card.innerHTML = `
+                    <div class="card-title">${titleText}</div>
+                    <div class="card-content">${contentHtml}</div>
+                    <div class="card-footer">
+                        <span>${ann.author || 'Администрация'}</span>
+                        <span>${ann.time || ''}</span>
+                        <span>${ann.target || 'Все классы'}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            // Если нет объявлений
+            if (data.announcements.length === 0) {
+                grid.innerHTML = `
+                    <div class="card" style="grid-column: span 2; text-align: center;">
+                        <div class="card-title">📺 Нет активных объявлений</div>
+                        <div class="card-content">Новые объявления появятся здесь</div>
+                    </div>
+                `;
+            }
+            
+            // Обновляем статусную строку
+            document.getElementById('systemStatus').innerHTML = `🔵 Система ${data.system_status}`;
+            document.getElementById('panelsStatus').innerHTML = `📺 ${data.panels_active}/${data.panels_total} панелей`;
+            document.getElementById('panelName').innerHTML = data.panel_name || 'Цифровая интерактивная система';
+            document.getElementById('updateCountdown').innerText = data.next_update || 45;
+            countdown = data.next_update || 45;
+            
+        } catch(e) {
+            console.error('Ошибка загрузки ТВ:', e);
+            document.getElementById('systemStatus').innerHTML = '⚠️ Ошибка соединения';
+        }
+    }
+    
+    function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('ru-RU', { hour12: false });
+        const dateStr = now.toLocaleDateString('ru-RU', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+        });
+        
+        document.getElementById('systemTime').innerHTML = `${timeStr} | ${dateStr}`;
+        
+        if (countdown > 0) {
+            countdown--;
+            document.getElementById('updateCountdown').innerText = countdown;
+        }
+    }
+    
+    function startPolling() {
+        fetchTVData();
+        setInterval(fetchTVData, 45000);
+        setInterval(updateClock, 1000);
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('logoutModal');
+        if (event.target === modal) {
+            hideLogoutModal();
+        }
+    }
+    
+    initTV();
+</script>
+</body>
+</html>
