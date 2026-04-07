@@ -6,22 +6,20 @@ import hashlib
 import secrets
 import os
 
-app = Flask(__name__, static_folder='../', static_url_path='')
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.config['SECRET_KEY'] = 'school215-secret-key-2024'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 CORS(app, supports_credentials=True)
 
-DB_CONFIG = {
-    'host': 'localhost',
-    'port': 5432,
-    'database': 'school215',
-    'user': 'postgres',
-    'password': '2708'
-}
+import os
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['database']}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Для Render.com
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'postgresql://postgres:2708@localhost:5432/school215'app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_size': 10,
     'pool_recycle': 3600,

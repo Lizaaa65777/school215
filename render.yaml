@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: school215-web
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app_complete:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: school215-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+
+  - type: worker
+    name: school215-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python test_bot.py
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: school215-db
+          property: connectionString
+
+databases:
+  - name: school215-db
+    plan: free
