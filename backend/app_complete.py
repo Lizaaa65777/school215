@@ -12,8 +12,6 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 CORS(app, supports_credentials=True)
 
-iimport os
-
 # Настройки Flask
 app = Flask(__name__, static_folder='../', static_url_path='')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'school215-secret-key-2024')
