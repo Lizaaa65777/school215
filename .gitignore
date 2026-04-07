@@ -1,0 +1,17 @@
+# SQLite (если используешь)
+*.db
+*.sqlite
+*.sqlite3
+
+# PostgreSQL / MySQL (файлы с локальными данными)
+*.pid
+*.log
+
+# Файлы конфигурации с паролями
+.env
+config.local.php
+settings_local.py
+
+# Если БД хранится в папке
+database/
+data/
