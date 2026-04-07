@@ -12,15 +12,34 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 CORS(app, supports_credentials=True)
 
-import os
+iimport os
 
-# Для Render.com
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
-    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+# Настройки Flask
+app = Flask(__name__, static_folder='../', static_url_path='')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'school215-secret-key-2024')
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+CORS(app, supports_credentials=True)
 
+# Подключение к базе данных
+# Получаем URL из переменной окружения Render
+database_url = os.environ.get('DATABASE_URL')
+if database_url and database_url.startswith('postgres://'):
+    # Render может давать URL с postgres://, а SQLAlchemy требует postgresql://
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'postgresql://postgres:2708@localhost:5432/school215'
+# Если переменной нет (локальная разработка), используем локальную БД
+if not database_url:
+    DB_CONFIG = {
+        'host': 'localhost',
+        'port': 5432,
+        'database': 'school215',
+        'user': 'postgres',
+        'password': '2708'
+    }
+    database_url = f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['database']}"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_size': 10,
