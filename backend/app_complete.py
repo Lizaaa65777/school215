@@ -201,7 +201,7 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    return send_from_directory('../', 'login.html')
+    return send_from_directory('../', 'index.html')
 
 @app.route('/admin')
 def admin_page():
