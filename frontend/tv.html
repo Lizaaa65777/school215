@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Школа 215 - TV Панель</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Tahoma', Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            overflow: hidden;
+        }
+        
+        .tv-screen {
+            width: 100vw;
+            height: 100vh;
+            padding: 25px 35px;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #ffffff 0%, #6ba5e8 50%, #3a7bc8 100%);
+            position: relative;
+        }
+        
+        .mode-normal {
+            background: linear-gradient(135deg, #ffffff 0%, #6ba5e8 50%, #3a7bc8 100%);
+        }
+        
+        .mode-emergency {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 50%, #8b0000 100%);
+            animation: emergencyFlash 0.5s infinite;
+        }
+        
+        .mode-urgent-only {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #e65c00 100%);
+        }
+        
+        @keyframes emergencyFlash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.95; }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .school-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: white;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .school-subtitle {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 5px;
+            letter-spacing: 2px;
+        }
+        
+        .mode-badge {
+            display: none;  /* Скрыт по умолчанию */
+            background: rgba(0,0,0,0.5);
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-top: 8px;
+            font-size: 0.7rem;
+            max-width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .mode-badge.urgent {
+            display: inline-block;
+            background: #ff6b35;
+            animation: pulse 1s infinite;
+        }
+
+        .mode-badge.emergency {
+            display: inline-block;
+            background: #ff0000;
+            animation: emergencyFlash 0.5s infinite;
+        }
+        
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 15px;
+            align-content: start;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+            animation: fadeInUp 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 200px;
+        }
+        
+        .card-announcement { border-left-color: #22c55e; }
+        .card-emergency { border-left-color: #ef4444; animation: emergencyPulse 1s infinite; }
+        .card-event { border-left-color: #a855f7; }
+        .card-schedule { border-left-color: #f97316; }
+        
+        @keyframes emergencyPulse {
+            0%, 100% { border-left-color: #ef4444; background: white; }
+            50% { border-left-color: #ff0000; background: #fff5f5; }
+        }
+        
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .card-announcement .card-title { color: #22c55e; }
+        .card-emergency .card-title { color: #ef4444; }
+        .card-event .card-title { color: #a855f7; }
+        .card-schedule .card-title { color: #f97316; }
+        
+        .card-content {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #444;
+            margin-bottom: 12px;
+            flex: 1;
+        }
+        
+        .card-footer {
+            font-size: 0.65rem;
+            display: flex;
+            color: #999;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+        
+        .main-footer {
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 25px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            color: white;
+            font-size: 0.85rem;
+        }
+        
+        .footer-item {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        
+        .footer-label {
+            opacity: 0.8;
+            font-weight: 500;
+        }
+        
+        .footer-value {
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .footer-value.time {
+            font-size: 1.1rem;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: statusPulse 1.5s infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .emergency-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 50%, #8b0000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 1000;
+            animation: emergencyFlash 0.5s infinite;
+        }
+        
+        .emergency-fullscreen h1 {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .emergency-fullscreen p {
+            font-size: 2rem;
+            max-width: 80%;
+            color: white;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 20px;
+        }
+        
+        .photo-fullscreen {
+            position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);  /* Прозрачный черный фон */
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+        }
+        
+        .photo-fullscreen img {
+            max-width: 90vw;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    margin: auto;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+        }
+        
+        .photo-timer {
+            position: fixed;
+    bottom: 30px;
+    right: 30px;
+    color: white;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-family: monospace;
+    font-size: 1rem;
+    z-index: 1001;
+    backdrop-filter: blur(5px);
+        }
+        
+        .photo-counter {
+            position: fixed;
+    bottom: 30px;
+    left: 30px;
+    color: white;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-family: monospace;
+    font-size: 1rem;
+    z-index: 1001;
+    backdrop-filter: blur(5px);
+        }
+        
+        .cycle-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.8rem;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        .logout-btn {
+            position: fixed;
+            bottom: 60px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(220, 53, 69, 0.8);
+            transform: scale(1.05);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 350px;
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .modal-content h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .modal-content p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .modal-buttons button {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .confirm-yes {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .confirm-yes:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+        
+        .confirm-no {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .confirm-no:hover {
+            background: #5a6268;
+            transform: scale(1.05);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 1400px) {
+            .main-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        
+        @media (max-width: 1024px) {
+            .tv-screen { padding: 15px 20px; }
+            .school-title { font-size: 2rem; }
+            .main-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 640px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        
+        .main-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .main-grid::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        
+        .main-grid::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+<div class="tv-screen" id="tvScreen">
+    <div class="header">
+        <div class="school-title">🏫 ШКОЛА 215 "СОЗВЕЗДИЕ"</div>
+        <div class="school-subtitle">Цифровая информационная система</div>
+        <div class="school-subtitle" id="panelName">Загрузка...</div>
+        <div id="modeBadge" class="mode-badge"></div>
+    </div>
+    
+    <div class="main-grid" id="announcementsGrid">
+        <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: white;">
+            Загрузка данных...
+        </div>
+    </div>
+    
+    <div class="main-footer">
+        <div class="footer-item">
+            <span class="footer-label">🕐</span>
+            <span class="footer-value time" id="systemTime">--:--:--</span>
+        </div>
+        <div class="footer-status">
+            <span class="status-dot"></span>
+            <span class="footer-label">Система</span>
+            <span class="footer-value" id="systemStatus">--</span>
+        </div>
+        <div class="footer-item">
+            <span class="footer-label">📺</span>
+            <span class="footer-value" id="panelsStatus">--/-- панелей</span>
+        </div>
+        <div class="footer-item">
+            <span class="footer-label">🔄 Цикл:</span>
+            <span class="footer-value" id="cycleTimer">05:00</span>
+        </div>
+    </div>
+    
+    <button class="logout-btn" onclick="showLogoutModal()">🔓 Выход</button>
+</div>
+
+<div id="cycleIndicator" class="cycle-indicator"></div>
+
+<div id="logoutModal" class="modal">
+    <div class="modal-content">
+        <h3>🔓 Выход из системы</h3>
+        <p>Вы уверены, что хотите выйти из ТВ-панели?</p>
+        <div class="modal-buttons">
+            <button class="confirm-yes" onclick="logout()">Да, выйти</button>
+            <button class="confirm-no" onclick="hideLogoutModal()">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ANNOUNCEMENTS_DURATION = 300;
+    const PHOTO_DURATION = 10;
+    
+    let tvToken = localStorage.getItem('tv_token');
+    let panelName = localStorage.getItem('panel_name') || 'Информационная панель';
+    let tvPanelId = localStorage.getItem('tv_panel_id');
+    
+    let currentMode = 'announcements';
+    let cycleRemainingSeconds = ANNOUNCEMENTS_DURATION;
+    let photosList = [];
+    let currentPhotoIndex = 0;
+    let isPhotoMode = false;
+    let photoTimer = null;
+    let cycleTimer = null;
+    let currentData = null;
+    let panelMode = 'normal'; // normal, urgent_only, emergency
+    
+    function showLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'flex';
+    }
+    
+    function hideLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+    
+    async function logout() {
+        console.log('🔓 Выход из ТВ-панели...');
+        if (tvToken) {
+            try {
+                await fetch(`/api/tv/logout`, {
+                    method: 'POST',
+                    headers: { 'X-TV-Token': tvToken }
+                });
+            } catch(e) {
+                console.error('Ошибка при выходе:', e);
+            }
+        }
+        localStorage.removeItem('tv_token');
+        localStorage.removeItem('panel_name');
+        localStorage.removeItem('tv_panel_id');
+        stopAll();
+        window.location.href = '/tv-login.html';
+    }
+    
+    async function init() {
+        console.log('🚀 Инициализация TV панели');
+        
+        if (!tvToken) {
+            console.log('Нет токена, перенаправление на tv-login.html');
+            window.location.href = '/tv-login.html';
+            return;
+        }
+        
+        // Проверяем токен на сервере
+        const isValid = await checkAuth();
+        if (!isValid) {
+            console.log('Токен невалиден, перенаправление');
+            localStorage.removeItem('tv_token');
+            localStorage.removeItem('panel_name');
+            localStorage.removeItem('tv_panel_id');
+            window.location.href = '/tv-login.html';
+            return;
+        }
+        
+        // Отображаем название панели
+        document.getElementById('panelName').innerHTML = panelName;
+        
+        startClock();
+        startPolling();
+    }
+    
+    async function checkAuth() {
+        try {
+            const response = await fetch(`/api/tv/check`, {
+                headers: { 'X-TV-Token': tvToken }
+            });
+            
+            if (response.status === 401) {
+                return false;
+            }
+            
+            if (response.ok) {
+                const data = await response.json();
+                tvPanelId = data.panel_id;
+                panelName = data.panel_name || panelName;
+                panelMode = data.mode || 'normal';
+                localStorage.setItem('tv_panel_id', tvPanelId);
+                localStorage.setItem('panel_name', panelName);
+                document.getElementById('panelName').innerHTML = panelName;
+                updateModeBadge();
+                return true;
+            }
+            return false;
+        } catch(e) {
+            console.error('Ошибка проверки токена:', e);
+            return false;
+        }
+    }
+    
+    function updateModeBadge() {
+        const badge = document.getElementById('modeBadge');
+        if (panelMode === 'emergency') {
+            badge.innerHTML = '🚨 РЕЖИМ ЧРЕЗВЫЧАЙНОЙ СИТУАЦИИ 🚨';
+            badge.className = 'mode-badge emergency';
+        } else if (panelMode === 'urgent_only') {
+            badge.innerHTML = '⚠️ РЕЖИМ "ТОЛЬКО СРОЧНЫЕ" ⚠️';
+            badge.className = 'mode-badge urgent';
+        } else {
+            badge.innerHTML = '';
+            badge.className = 'mode-badge';
+        }
+    }
+    
+    async function loadPhotos() {
+        if (!tvToken) return;
+        try {
+            const response = await fetch(`/api/tv/photos`, {
+                headers: { 'X-TV-Token': tvToken }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                photosList = data.photos || [];
+                console.log(`📸 Загружено ${photosList.length} фото`);
+            }
+        } catch(e) {
+            console.error('Ошибка загрузки фото:', e);
+        }
+    }
+    
+    async function fetchTVData() {
+        if (!tvToken) return;
+        try {
+            console.log('Запрос данных с сервера...');
+            const response = await fetch(`/api/tv/data`, {
+                headers: { 
+                    'X-TV-Token': tvToken
+                }
+            });
+            
+            if (response.status === 401) {
+                console.log('Ошибка авторизации, перенаправление');
+                window.location.href = '/tv-login.html';
+                return;
+            }
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            console.log('Данные получены:', data);
+            currentData = data;
+            
+            // Обновляем режим панели
+            panelMode = data.panel_mode || data.mode || 'normal';
+            updateModeBadge();
+            
+            if (panelMode === 'emergency') {
+                stopAll();
+                showEmergencyMode(data);
+                return;
+            }
+            
+            await loadPhotos();
+            
+            if (!isPhotoMode) {
+                updateUI(data);
+                if (!cycleTimer) startCycle();
+            }
+        } catch(e) {
+            console.error('Ошибка загрузки данных:', e);
+        }
+    }
+    
+    function startCycle() {
+        if (cycleTimer) clearInterval(cycleTimer);
+        currentMode = 'announcements';
+        cycleRemainingSeconds = ANNOUNCEMENTS_DURATION;
+        updateCycleTimer();
+        updateIndicator();
+        
+        cycleTimer = setInterval(() => {
+            if (cycleRemainingSeconds > 0) {
+                cycleRemainingSeconds--;
+                updateCycleTimer();
+            } else {
+                if (photosList.length > 0 && panelMode !== 'urgent_only') {
+                    startPhotoMode();
+                } else {
+                    cycleRemainingSeconds = ANNOUNCEMENTS_DURATION;
+                }
+            }
+        }, 1000);
+    }
+    
+    function startPhotoMode() {
+        if (isPhotoMode) return;
+        if (panelMode === 'urgent_only') {
+            // В режиме "только срочные" фото не показываем
+            return;
+        }
+        console.log('🎬 НАЧАЛО ПОКАЗА ФОТО');
+        isPhotoMode = true;
+        currentMode = 'photos';
+        currentPhotoIndex = 0;
+        if (cycleTimer) {
+            clearInterval(cycleTimer);
+            cycleTimer = null;
+        }
+        showPhoto();
+    }
+    
+    function showPhoto() {
+        if (currentPhotoIndex >= photosList.length) {
+            finishPhotoMode();
+            return;
+        }
+        const photo = photosList[currentPhotoIndex];
+        console.log(`📸 ФОТО ${currentPhotoIndex + 1}/${photosList.length}`);
+        
+        const existing = document.getElementById('photoFullscreen');
+        if (existing) existing.remove();
+        
+        // Получаем URL фото, обрабатываем возможные пробелы в caption
+        const photoUrl = photo.photo_url;
+        const caption = (photo.caption || 'Фото').replace(/\s+/g, ' ').trim();
+        
+        const photoHTML = `
+            <div class="photo-fullscreen" id="photoFullscreen" onclick="closePhotoEarly()">
+                <img src="${photoUrl}?t=${Date.now()}" alt="${escapeHtml(caption)}" loading="lazy">
+                <div class="photo-timer">⏱ ${PHOTO_DURATION} сек</div>
+                <div class="photo-counter">📸 ${currentPhotoIndex + 1}/${photosList.length}</div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', photoHTML);
+        updateIndicator();
+        
+        if (photoTimer) clearTimeout(photoTimer);
+        photoTimer = setTimeout(() => {
+            currentPhotoIndex++;
+            showPhoto();
+        }, PHOTO_DURATION * 1000);
+    }
+
+// Функция для досрочного закрытия фото при клике
+function closePhotoEarly() {
+    if (photoTimer) {
+        clearTimeout(photoTimer);
+        currentPhotoIndex++;
+        showPhoto();
+    }
+}
+
+    function finishPhotoMode() {
+        console.log('✅ ПОКАЗ ФОТО ЗАВЕРШЕН, возврат к объявлениям');
+        if (photoTimer) clearTimeout(photoTimer);
+        const photoElement = document.getElementById('photoFullscreen');
+        if (photoElement) photoElement.remove();
+        isPhotoMode = false;
+        currentMode = 'announcements';
+        if (currentData) updateUI(currentData);
+        cycleRemainingSeconds = ANNOUNCEMENTS_DURATION;
+        updateCycleTimer();
+        updateIndicator();
+        
+        if (cycleTimer) clearInterval(cycleTimer);
+        cycleTimer = setInterval(() => {
+            if (cycleRemainingSeconds > 0) {
+                cycleRemainingSeconds--;
+                updateCycleTimer();
+            } else {
+                if (photosList.length > 0 && !isPhotoMode && panelMode !== 'urgent_only') {
+                    startPhotoMode();
+                } else {
+                    cycleRemainingSeconds = ANNOUNCEMENTS_DURATION;
+                }
+            }
+        }, 1000);
+    }
+    function updateCycleTimer() {
+        const timerEl = document.getElementById('cycleTimer');
+        if (timerEl) {
+            const minutes = Math.floor(cycleRemainingSeconds / 60);
+            const seconds = cycleRemainingSeconds % 60;
+            timerEl.innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }
+    
+    function updateIndicator() {
+        const indicator = document.getElementById('cycleIndicator');
+        if (panelMode === 'urgent_only') {
+            indicator.innerHTML = `⚠️ ТОЛЬКО СРОЧНЫЕ ОБЪЯВЛЕНИЯ ⚠️`;
+            indicator.style.background = 'rgba(255, 107, 53, 0.9)';
+        } else if (currentMode === 'announcements') {
+            const minutes = Math.floor(cycleRemainingSeconds / 60);
+            const seconds = cycleRemainingSeconds % 60;
+            indicator.innerHTML = `📢 ОБЪЯВЛЕНИЯ • ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            indicator.style.background = 'rgba(34, 197, 94, 0.8)';
+        } else {
+            indicator.innerHTML = `📸 ФОТО ${currentPhotoIndex + 1}/${photosList.length} • ${PHOTO_DURATION} сек`;
+            indicator.style.background = 'rgba(6, 182, 212, 0.8)';
+        }
+    }
+    
+    function stopAll() {
+        if (cycleTimer) clearInterval(cycleTimer);
+        if (photoTimer) clearTimeout(photoTimer);
+        const photoElement = document.getElementById('photoFullscreen');
+        if (photoElement) photoElement.remove();
+        isPhotoMode = false;
+    }
+    
+    function updateUI(data) {
+        const screen = document.getElementById('tvScreen');
+        if (panelMode === 'urgent_only') {
+            screen.className = 'tv-screen mode-urgent-only';
+        } else {
+            screen.className = `tv-screen mode-${data.mode || 'normal'}`;
+        }
+        document.getElementById('systemStatus').innerHTML = data.system_status || 'работает';
+        document.getElementById('panelsStatus').innerHTML = `${data.panels_active || 0}/${data.panels_total || 0} панелей`;
+        
+        // Фильтруем объявления в зависимости от режима
+        let announcements = data.announcements || [];
+        if (panelMode === 'urgent_only') {
+            // Показываем только срочные объявления
+            announcements = announcements.filter(ann => ann.type === 'emergency');
+            console.log('🔴 Режим "только срочные": показано', announcements.length, 'срочных объявлений');
+        }
+        
+        renderAnnouncements(announcements);
+    }
+    
+    function showEmergencyMode(data) {
+        const emergencyMessage = data.emergency_message || 'Внимание! Чрезвычайная ситуация!';
+        document.body.innerHTML = `
+            <div class="emergency-fullscreen">
+                <h1>⚠️ ЧРЕЗВЫЧАЙНАЯ СИТУАЦИЯ ⚠️</h1>
+                <p>${escapeHtml(emergencyMessage)}</p>
+                <p style="font-size: 1rem; margin-top: 50px;">${new Date().toLocaleTimeString()}</p>
+                <button class="logout-btn" onclick="location.reload()">🔄 Выйти из ЧС</button>
+            </div>
+        `;
+    }
+    
+    function renderAnnouncements(announcements) {
+        const grid = document.getElementById('announcementsGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        if (!announcements || announcements.length === 0) {
+            let emptyMessage = 'Нет активных объявлений';
+            if (panelMode === 'urgent_only') {
+                emptyMessage = '⚠️ Нет срочных объявлений. Режим "Только срочные" активен.';
+            }
+            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: white;">${emptyMessage}</div>`;
+            return;
+        }
+        announcements.forEach((ann) => {
+            const card = createCard(ann);
+            grid.appendChild(card);
+        });
+    }
+    
+    function createCard(ann) {
+        const card = document.createElement('div');
+        let typeClass = '';
+        let icon = '';
+        switch(ann.type) {
+            case 'emergency': typeClass = 'card-emergency'; icon = '🚨 '; break;
+            case 'event': typeClass = 'card-event'; icon = '🎉 '; break;
+            case 'schedule': typeClass = 'card-schedule'; icon = '📅 '; break;
+            default: typeClass = 'card-announcement'; icon = '📢 ';
+        }
+        card.className = `card ${typeClass}`;
+        let contentHtml = (ann.content || '').replace(/\n/g, '<br>');
+        card.innerHTML = `
+            <div>
+                <div class="card-title"><span>${icon}</span><span>${escapeHtml(ann.title || 'Сообщение')}</span></div>
+                <div class="card-content">${contentHtml}</div>
+            </div>
+            <div class="card-footer">
+                <span>${escapeHtml(ann.author || 'Администрация')}</span>
+                <span>${escapeHtml(ann.time || '')}</span>
+                <span>${escapeHtml(ann.target || 'Все классы')}</span>
+            </div>
+        `;
+        return card;
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function startClock() {
+        updateClock();
+        setInterval(updateClock, 1000);
+    }
+    
+    function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('ru-RU', { hour12: false });
+        const timeEl = document.getElementById('systemTime');
+        if (timeEl) timeEl.innerHTML = timeStr;
+    }
+    
+    function startPolling() {
+        fetchTVData();
+        setInterval(fetchTVData, 30000);
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('logoutModal');
+        if (event.target === modal) hideLogoutModal();
+    };
+    
+    init();
+</script>
+</body>
+</html>

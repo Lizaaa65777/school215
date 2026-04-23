@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Школа 215 · Родительский контроль</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a2647 0%, #1e3a5f 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Шапка */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            color: #0a2647;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-name {
+            font-weight: bold;
+            color: #0a2647;
+        }
+        
+        .logout-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: #b91c1c;
+            transform: scale(1.02);
+        }
+        
+        /* Вкладки */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #0a2647;
+        }
+        
+        .tab-btn.active {
+            background: #0a2647;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: white;
+            transform: translateY(-2px);
+        }
+        
+        /* Контент вкладок */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Карточка ребенка */
+        .child-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .child-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0ecf9;
+        }
+        
+        .child-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #0a2647 0%, #1e3a5f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
+        
+        .child-info h2 {
+            color: #0a2647;
+            margin-bottom: 5px;
+        }
+        
+        .child-info p {
+            color: #666;
+        }
+        
+        /* Секции внутри карточки */
+        .section {
+            margin-top: 25px;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0a2647;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Стили для заглушки-ссылки на Дневник.ру */
+        .dnevnik-link-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e8f0fe 100%);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .dnevnik-link-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #0a2647;
+        }
+        
+        .dnevnik-icon {
+            width: 70px;
+            height: 70px;
+            background: #0a2647;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .dnevnik-link-card h3 {
+            color: #0a2647;
+            font-size: 1.2rem;
+        }
+        
+        .dnevnik-link-card p {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .dnevnik-link-card .redirect-btn {
+            background: linear-gradient(135deg, #0a2647 0%, #1e3a5f 100%);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-top: 5px;
+        }
+        
+        .dnevnik-link-card .redirect-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* Объявления */
+        .announcements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .announcement-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            border-left: 5px solid;
+        }
+        
+        .announcement-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .announcement-type-announcement { border-left-color: #3b82f6; }
+        .announcement-type-emergency { border-left-color: #dc2626; animation: pulse 2s infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { background: white; }
+            50% { background: #fef2f2; }
+        }
+        
+        .announcement-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #0a2647;
+            margin-bottom: 10px;
+        }
+        
+        .announcement-content {
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .announcement-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #999;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        
+        /* Галерея фото */
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+        
+        .photo-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .photo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+        }
+        
+        .photo-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+        
+        .photo-info {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .photo-description {
+            font-size: 0.95rem;
+            color: #333;
+            margin-bottom: 12px;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+        
+        .photo-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+        
+        .photo-author {
+            font-size: 0.7rem;
+            color: #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .photo-date {
+            font-size: 0.7rem;
+            color: #999;
+        }
+        
+        .photo-hashtag {
+            display: inline-block;
+            background: #e8f0fe;
+            color: #0a2647;
+            font-size: 0.65rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+            align-self: flex-start;
+        }
+        
+        /* Модальное окно для просмотра фото */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .modal img {
+            max-width: 100%;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        
+        .modal-description {
+            margin-top: 20px;
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            max-width: 80%;
+        }
+        
+        /* Загрузка */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: white;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+            background: white;
+            border-radius: 20px;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            .announcements-grid {
+                grid-template-columns: 1fr;
+            }
+            .photos-grid {
+                grid-template-columns: 1fr;
+            }
+            .photo-card img {
+                height: 180px;
+            }
+            .modal-description {
+                font-size: 0.8rem;
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-chalkboard-user"></i> Школа 215 · Родительский контроль</h1>
+            <div class="user-info">
+                <span class="user-name" id="userName">Загрузка...</span>
+                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('children')">
+                <i class="fas fa-child"></i> Мои дети
+            </button>
+            <button class="tab-btn" onclick="switchTab('announcements')">
+                <i class="fas fa-bullhorn"></i> Объявления
+            </button>
+            <button class="tab-btn" onclick="switchTab('photos')">
+                <i class="fas fa-images"></i> Фотогалерея
+            </button>
+        </div>
+        
+        <div id="children-tab" class="tab-content active">
+            <div id="children-container"></div>
+        </div>
+        
+        <div id="announcements-tab" class="tab-content">
+            <div id="announcements-container"></div>
+        </div>
+        
+        <div id="photos-tab" class="tab-content">
+            <div id="photos-container"></div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для фото -->
+    <div id="photoModal" class="modal" onclick="closePhotoModal()">
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="">
+            <div class="modal-description" id="modalDescription"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        let currentUser = null;
+        let allAnnouncements = [];
+        let allPhotos = [];
+        
+        // Ссылка на Дневник.ру
+        const DNEVNIK_RU_URL = 'https://dnevnik.ru';
+        
+        // Функция перенаправления на Дневник.ру
+        function redirectToDnevnik() {
+            window.open(DNEVNIK_RU_URL, '_blank');
+        }
+        
+        // ============ АВТОРИЗАЦИЯ ============
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_URL}/api/auth/me`, { 
+                    credentials: 'include' 
+                });
+                
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return null;
+                }
+                
+                currentUser = await response.json();
+                
+                if (currentUser.role !== 'parent') {
+                    window.location.href = '/';
+                    return null;
+                }
+                
+                document.getElementById('userName').innerText = currentUser.fullName || 'Родитель';
+                return currentUser;
+            } catch (error) {
+                console.error('Ошибка проверки авторизации:', error);
+                window.location.href = '/';
+                return null;
+            }
+        }
+        
+        async function logout() {
+            await fetch(`${API_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+            window.location.href = '/';
+        }
+        
+        // ============ ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ============
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'children') {
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+                document.getElementById('children-tab').classList.add('active');
+                loadChildrenData();
+            } else if (tab === 'announcements') {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('announcements-tab').classList.add('active');
+                loadAnnouncements();
+            } else if (tab === 'photos') {
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                document.getElementById('photos-tab').classList.add('active');
+                loadPhotos();
+            }
+        }
+        
+        // ============ ЗАГРУЗКА ДАННЫХ ДЕТЕЙ ============
+        async function loadChildrenData() {
+            const container = document.getElementById('children-container');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Загрузка...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/parent/children`, { 
+                    credentials: 'include' 
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки');
+                }
+                
+                const children = await response.json();
+                
+                if (children.length === 0) {
+                    container.innerHTML = '<div class="child-card"><div class="empty-state"><i class="fas fa-user-graduate"></i><p>Нет привязанных детей. Обратитесь к администратору.</p></div></div>';
+                    return;
+                }
+                
+                let html = '';
+                for (const child of children) {
+                    html += `
+                        <div class="child-card">
+                            <div class="child-header">
+                                <div class="child-avatar"><i class="fas fa-child"></i></div>
+                                <div class="child-info">
+                                    <h2>${escapeHtml(child.fullName || child.full_name)}</h2>
+                                    <p>${escapeHtml(child.class_name || 'Класс не указан')}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="section">
+                                <div class="section-title"><i class="fas fa-star"></i> Оценки</div>
+                                <div class="dnevnik-link-card" onclick="redirectToDnevnik()">
+                                    <div class="dnevnik-icon"><i class="fas fa-chart-line"></i></div>
+                                    <h3>📊 Просмотр оценок</h3>
+                                    <p>Для просмотра успеваемости и посещаемости перейдите в электронный дневник</p>
+                                    <button class="redirect-btn"><i class="fas fa-external-link-alt"></i> Перейти в Дневник.ру</button>
+                                </div>
+                            </div>
+                            
+                            <div class="section">
+                                <div class="section-title"><i class="fas fa-home"></i> Домашние задания</div>
+                                <div class="dnevnik-link-card" onclick="redirectToDnevnik()">
+                                    <div class="dnevnik-icon"><i class="fas fa-book"></i></div>
+                                    <h3>📚 Домашние задания</h3>
+                                    <p>Актуальные домашние задания доступны в электронном дневнике</p>
+                                    <button class="redirect-btn"><i class="fas fa-external-link-alt"></i> Перейти в Дневник.ру</button>
+                                </div>
+                            </div>
+                            
+                            <div class="section">
+                                <div class="section-title"><i class="fas fa-calendar"></i> Расписание</div>
+                                <div class="dnevnik-link-card" onclick="redirectToDnevnik()">
+                                    <div class="dnevnik-icon"><i class="fas fa-calendar-week"></i></div>
+                                    <h3>📅 Расписание уроков</h3>
+                                    <p>Полное расписание занятий доступно в электронном дневнике</p>
+                                    <button class="redirect-btn"><i class="fas fa-external-link-alt"></i> Перейти в Дневник.ру</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки детей:', error);
+                container.innerHTML = '<div class="child-card"><div class="empty-state">Ошибка загрузки данных</div></div>';
+            }
+        }
+        
+        // ============ ОБЪЯВЛЕНИЯ ============
+        async function loadAnnouncements() {
+            const container = document.getElementById('announcements-container');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Загрузка объявлений...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/announcements`, { credentials: 'include' });
+                allAnnouncements = await response.json();
+                
+                // Фильтруем объявления (показываем все, включая срочные)
+                const filtered = allAnnouncements;
+                
+                if (filtered.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>Нет объявлений</p></div>';
+                    return;
+                }
+                
+                const html = `
+                    <div class="announcements-grid">
+                        ${filtered.map(a => `
+                            <div class="announcement-card announcement-type-${a.announcement_type}">
+                                <div class="announcement-title">
+                                    ${a.announcement_type === 'emergency' ? '🚨 ' : a.announcement_type === 'event' ? '🎉 ' : '📢 '}
+                                    ${escapeHtml(a.title)}
+                                </div>
+                                <div class="announcement-content">${escapeHtml(a.content)}</div>
+                                <div class="announcement-footer">
+                                    <span><i class="fas fa-user"></i> ${escapeHtml(a.author_name || 'Администрация')}</span>
+                                    <span><i class="fas fa-clock"></i> ${new Date(a.created_at).toLocaleString('ru-RU')}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки объявлений:', error);
+                container.innerHTML = '<div class="empty-state">Ошибка загрузки объявлений</div>';
+            }
+        }
+        
+        // ============ ФОТОГАЛЕРЕЯ С ПОДПИСЯМИ ============
+        async function loadPhotos() {
+            const container = document.getElementById('photos-container');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Загрузка фотографий...</div>';
+            
+            try {
+                // Получаем фото через API
+                const response = await fetch(`${API_URL}/api/tv/photos`, { 
+                    credentials: 'include',
+                    headers: {
+                        'X-TV-Token': localStorage.getItem('tv_token') || ''
+                    }
+                });
+                
+                let photos = [];
+                if (response.ok) {
+                    const data = await response.json();
+                    photos = data.photos || [];
+                }
+                
+                // Получаем объявления, чтобы сопоставить описания с фото
+                const announcementsRes = await fetch(`${API_URL}/api/announcements`, { credentials: 'include' });
+                if (announcementsRes.ok) {
+                    const announcements = await announcementsRes.json();
+                    // Фильтруем объявления с фото
+                    const photoAnnouncements = announcements.filter(a => a.content && (a.content.includes('📸') || a.title.includes('📸')));
+                    
+                    // Сопоставляем фото с описаниями
+                    photos = photos.map(photo => {
+                        // Ищем описание для этого фото
+                        const matchingAnnouncement = photoAnnouncements.find(a => 
+                            a.created_at && photo.created_at && 
+                            Math.abs(new Date(a.created_at) - new Date(photo.created_at)) < 60000
+                        );
+                        
+                        if (matchingAnnouncement) {
+                            // Извлекаем описание из объявления
+                            let description = matchingAnnouncement.content;
+                            // Убираем хештег из описания для отображения
+                            let cleanDescription = description.replace(/#\w+/g, '').trim();
+                            let hashtag = description.match(/#\w+/)?.[0] || '';
+                            
+                            return {
+                                ...photo,
+                                description: cleanDescription,
+                                hashtag: hashtag,
+                                author: matchingAnnouncement.author_name || 'Участник мероприятия'
+                            };
+                        }
+                        return photo;
+                    });
+                }
+                
+                allPhotos = photos;
+                
+                if (allPhotos.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-camera"></i><p>Фотографии пока не добавлены</p><p style="font-size: 0.8rem; margin-top: 10px;">Отправьте фото через VK бота с описанием и хештегом #мероприятие</p></div>';
+                    return;
+                }
+                
+                const html = `
+                    <div class="photos-grid">
+                        ${allPhotos.map(photo => `
+                            <div class="photo-card" onclick="openPhotoModal('${photo.photo_url}', '${escapeHtml(photo.description || photo.caption || '')}')">
+                                <img src="${photo.photo_url}" alt="${escapeHtml(photo.caption || 'Фото')}" loading="lazy">
+                                <div class="photo-info">
+                                    ${photo.hashtag ? `<span class="photo-hashtag">${escapeHtml(photo.hashtag)}</span>` : ''}
+                                    <div class="photo-description">${escapeHtml((photo.description || photo.caption || 'Фото мероприятия').substring(0, 150))}${(photo.description || photo.caption || '').length > 150 ? '...' : ''}</div>
+                                    <div class="photo-meta">
+                                        <span class="photo-author"><i class="fas fa-user"></i> ${escapeHtml(photo.author || 'Школа 215')}</span>
+                                        <span class="photo-date"><i class="fas fa-calendar-alt"></i> ${photo.created_at ? new Date(photo.created_at).toLocaleDateString('ru-RU') : ''}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки фото:', error);
+                container.innerHTML = '<div class="empty-state">Ошибка загрузки фотографий</div>';
+            }
+        }
+        
+        function openPhotoModal(url, description) {
+            const modal = document.getElementById('photoModal');
+            const img = document.getElementById('modalImage');
+            const descriptionDiv = document.getElementById('modalDescription');
+            img.src = url;
+            descriptionDiv.textContent = description || 'Фото мероприятия';
+            modal.classList.add('active');
+        }
+        
+        function closePhotoModal() {
+            const modal = document.getElementById('photoModal');
+            modal.classList.remove('active');
+            document.getElementById('modalImage').src = '';
+            document.getElementById('modalDescription').textContent = '';
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // ============ ИНИЦИАЛИЗАЦИЯ ============
+        (async function init() {
+            const user = await checkAuth();
+            if (user) {
+                await loadChildrenData();
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в ТВ-панель - Школа 215</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .login-container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 400px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #ffaa00;
+        }
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.9);
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: #ffaa00;
+            color: #0a0e27;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.02);
+            background: #ffbb22;
+        }
+        .error {
+            background: rgba(255,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .info {
+            background: rgba(0,0,255,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .success {
+            background: rgba(0,255,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .tv-list {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .tv-list h3 {
+            color: #ffaa00;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        .tv-item {
+            padding: 5px;
+            font-size: 0.85rem;
+            font-family: monospace;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>📺 ТВ-Панель</h1>
+        <div class="subtitle">Школа 215 "Созвездие"</div>
+        
+        <div class="info">
+            ⚠️ Введите логин и пароль, которые выдал администратор<br>
+            <small>(Обратитесь к администратору для получения доступа)</small>
+        </div>
+        
+        <input type="text" id="username" placeholder="Логин ТВ-панели" autocomplete="off">
+        <input type="password" id="password" placeholder="Пароль">
+        
+        <button onclick="loginTV()">🔑 Войти в ТВ-панель</button>
+        
+        <div id="errorMsg" style="display: none;" class="error"></div>
+        <div id="successMsg" style="display: none;" class="success"></div>
+        
+    </div>
+
+    <script>
+        async function loginTV() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMsg');
+            const successDiv = document.getElementById('successMsg');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            if (!username || !password) {
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = '❌ Введите логин и пароль';
+                return;
+            }
+            
+            try {
+                console.log('Отправка запроса на /api/tv/login');
+                
+                const response = await fetch('/api/tv/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                console.log('Ответ сервера:', data);
+                
+                if (response.ok && data.success) {
+                    // Сохраняем токен и данные панели
+                    localStorage.setItem('tv_token', data.token);
+                    localStorage.setItem('tv_panel_id', data.panel_id);
+                    localStorage.setItem('panel_name', data.panel_name || username);
+                    
+                    successDiv.style.display = 'block';
+                    successDiv.textContent = '✅ ' + (data.message || 'Вход выполнен! Перенаправление...');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/tv.html';
+                    }, 1500);
+                } else {
+                    errorDiv.style.display = 'block';
+                    errorDiv.textContent = '❌ ' + (data.error || 'Неверный логин или пароль');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = '❌ Ошибка соединения с сервером. Убедитесь, что сервер запущен.';
+            }
+        }
+        
+        // Если уже есть токен - проверяем его на сервере
+        if (localStorage.getItem('tv_token')) {
+            (async () => {
+                try {
+                    const response = await fetch('/api/tv/check', {
+                        headers: { 'X-TV-Token': localStorage.getItem('tv_token') }
+                    });
+                    if (response.ok) {
+                        window.location.href = '/tv.html';
+                    } else {
+                        localStorage.removeItem('tv_token');
+                        localStorage.removeItem('tv_panel_id');
+                        localStorage.removeItem('panel_name');
+                    }
+                } catch(e) {
+                    console.error('Ошибка проверки токена:', e);
+                }
+            })();
+        }
+        
+        // Вход по Enter
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loginTV();
+            }
+        });
+    </script>
+</body>
+</html>
